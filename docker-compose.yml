@@ -1,0 +1,90 @@
+
+services:
+  auth:
+    build: ./services/auth
+    container_name: sentinel-auth
+    networks:
+      - internal
+    expose:
+      - "8001"
+    volumes:
+      - auth_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8001/healthz')\""]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - LOG_SERVICE_URL=${LOG_SERVICE_URL}
+    depends_on:
+      - postgres
+
+  api:
+    build: ./services/api
+    container_name: sentinel-api
+    networks:
+      - internal
+    expose:
+      - "8002"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8002/healthz')\""]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+
+  log:
+    build: ./services/log
+    container_name: sentinel-log
+    networks:
+      - internal
+    expose:
+      - "8003"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8003/healthz')\""]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - postgres
+
+  nginx:
+    image: nginx:stable
+    container_name: sentinel-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./web:/usr/share/nginx/html:ro
+    depends_on:
+      - auth
+      - api
+      - log
+    networks:
+      - internal
+  
+  postgres:
+    image: postgres:16
+    container_name: sentinel-postgres
+    environment:
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinelpass
+      POSTGRES_DB: sentinel
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  auth_data:
+  pg_data:

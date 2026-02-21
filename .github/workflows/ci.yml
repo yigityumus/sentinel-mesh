@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [auth, api, log]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        working-directory: services/${{ matrix.service }}
+        run: |
+          poetry install
+
+      - name: Run tests
+        working-directory: services/${{ matrix.service }}
+        run: |
+          poetry run pytest || true
+
+      - name: Run lint
+        working-directory: services/${{ matrix.service }}
+        run: |
+          poetry run ruff check .

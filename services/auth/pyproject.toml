@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "auth-service"
+version = "0.1.0"
+description = "SentinelMesh authentication service"
+authors = ["Yigit Yumus <yigityumus@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.110.0"
+uvicorn = { extras = ["standard"], version = "^0.27.0" }
+sqlalchemy = "^2.0.0"
+pydantic-settings = "^2.0.0"
+argon2-cffi = "^23.1.0"
+python-jose = { extras = ["cryptography"], version = "^3.3.0" }
+email-validator = "^2.3.0"
+psycopg = {extras = ["binary"], version = "^3.3.3"}
+httpx = "^0.28.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+ruff = "^0.4.0"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"

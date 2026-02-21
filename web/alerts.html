@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SentinelMesh - Alerts</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Small page-specific tweaks */
+    body { align-items: flex-start; padding-top: 48px; height: auto; }
+    .card { width: min(900px, 92vw); }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #334155; font-size: 12px; }
+    .pill.high { background: rgba(248,113,113,0.2); border: 1px solid rgba(248,113,113,0.5); }
+    .pill.medium { background: rgba(251,191,36,0.2); border: 1px solid rgba(251,191,36,0.5); }
+    .pill.low { background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.5); }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid rgba(148,163,184,0.2); vertical-align: top; }
+    th { color: #cbd5e1; font-weight: 600; font-size: 13px; }
+    td { color: #e2e8f0; font-size: 13px; }
+    .muted { color: #94a3b8; }
+    .actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-secondary { background: #334155; }
+    .btn-secondary:hover { background: #475569; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .small { font-size: 12px; }
+    .nowrap { white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="topbar">
+      <div>
+        <h1 style="margin:0;">Alerts</h1>
+        <div class="muted small">Live view from <span class="mono">/log/alerts</span></div>
+      </div>
+      <div class="actions">
+        <button class="btn-secondary" onclick="refreshAlerts()">Refresh</button>
+        <button onclick="window.location.href='/dashboard.html'">Dashboard</button>
+      </div>
+    </div>
+
+    <div id="status" class="muted">Loading...</div>
+
+    <div style="overflow-x:auto;">
+      <table id="alertsTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Rule</th>
+            <th>Severity</th>
+            <th>IP</th>
+            <th>Count</th>
+            <th>Window</th>
+            <th>First seen</th>
+            <th>Last seen</th>
+            <th>Created</th>
+            <th>Meta</th>
+          </tr>
+        </thead>
+        <tbody id="alertsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Auto-refresh every 5 seconds
+    loadAlerts();
+    setInterval(loadAlerts, 5000);
+  </script>
+</body>
+</html>

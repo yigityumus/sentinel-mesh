@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "api-service"
+version = "0.1.0"
+description = "SentinelMesh API service"
+authors = ["Yigit Yumus <yigityumus@gmail.com>"]
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.110.0"
+uvicorn = {extras = ["standard"], version = "^0.41.0"}
+pydantic-settings = "^2.0.0"
+python-jose = {extras = ["cryptography"], version = "^3.5.0"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+ruff = "^0.4.0"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
