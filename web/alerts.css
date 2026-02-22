@@ -1,0 +1,159 @@
+/* ===== Page Layout ===== */
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 48px;
+  margin: 0;
+}
+
+.card {
+  background: #1e293b;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.wide-card {
+  width: min(1200px, 95vw);
+}
+
+h1 {
+  margin: 0;
+}
+
+.muted {
+  color: #94a3b8;
+}
+
+.small {
+  font-size: 12px;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* ===== Topbar ===== */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.top-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ===== Buttons ===== */
+
+button {
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  background: #334155;
+}
+
+.btn-secondary:hover {
+  background: #475569;
+}
+
+/* ===== Table Wrapper (Horizontal Scroll) ===== */
+
+.table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* ===== Table ===== */
+
+table {
+  border-collapse: collapse;
+  min-width: 1200px; /* forces horizontal scroll */
+}
+
+th, td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid rgba(148,163,184,0.2);
+  font-size: 13px;
+  white-space: nowrap; /* prevent vertical letter stacking */
+}
+
+th {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+/* ===== Severity Pills ===== */
+
+.pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.pill.high {
+  background: rgba(248,113,113,0.2);
+  border: 1px solid rgba(248,113,113,0.5);
+}
+
+.pill.medium {
+  background: rgba(251,191,36,0.2);
+  border: 1px solid rgba(251,191,36,0.5);
+}
+
+.pill.low {
+  background: rgba(34,197,94,0.2);
+  border: 1px solid rgba(34,197,94,0.5);
+}
+
+/* ===== Status Colors ===== */
+
+.status-open {
+  color: #f87171;
+}
+
+.status-ack {
+  color: #fbbf24;
+}
+
+.status-closed {
+  color: #22c55e;
+}
+
+/* ===== Actions ===== */
+
+td button {
+  padding: 6px 10px;
+  margin: 3px 6px 3px 0;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* ===== Meta Column ===== */
+
+td:last-child {
+  font-size: 12px;
+  white-space: pre;
+}

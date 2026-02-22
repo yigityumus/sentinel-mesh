@@ -1,15 +1,22 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
-from datetime import timedelta
+from datetime import datetime, timezone, timedelta
 
 from .db import Base, engine, get_db
 from .models import Event, Alert
-from .schemas import IngestEvent, IngestResponse, AlertOut
+from .schemas import IngestEvent, IngestResponse, AlertOut, AlertUpdate
+from .detections.engine import run_detection_pipeline
 
 app = FastAPI(title="log-service")
 
 Base.metadata.create_all(bind=engine)
+
+
+# TODO : There's another now() function in app/app/log_client.py. 
+# Even though it's another microservice, think about if the similar functions should have same names and code.
+def utcnow():
+    return datetime.now(timezone.utc)
 
 
 @app.get("/healthz")
@@ -84,10 +91,9 @@ def ingest(payload: IngestEvent, db: Session = Depends(get_db)):
     db.add(ev)
     db.commit()
 
-    # Detection (after commit so the event is visible to queries)
-    if payload.event == "login_failed":
-        detect_bruteforce_login_failed(db, ip=payload.ip, now_ts=payload.ts)
-        db.commit()
+    # Run detection pipeline
+    run_detection_pipeline(db, ev)
+    db.commit()
 
     return IngestResponse(stored=True)
 
@@ -96,3 +102,35 @@ def ingest(payload: IngestEvent, db: Session = Depends(get_db)):
 def list_alerts(db: Session = Depends(get_db)):
     q = select(Alert).order_by(Alert.id.desc()).limit(50)
     return list(db.execute(q).scalars().all())
+
+
+@app.patch("/alerts/{alert_id}", response_model=AlertOut)
+def update_alert(alert_id: int, payload: AlertUpdate, db: Session = Depends(get_db)):
+    alert = db.execute(select(Alert).where(Alert.id == alert_id)).scalars().first()
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert not found")
+
+    now = utcnow()
+
+    if payload.action == "ack":
+        alert.status = "acknowledged"
+        alert.acknowledged_at = now
+        alert.acknowledged_by = payload.actor
+
+    elif payload.action == "close":
+        alert.status = "closed"
+        alert.closed_at = now
+        alert.closed_by = payload.actor
+
+    elif payload.action == "reopen":
+        alert.status = "open"
+        alert.acknowledged_at = None
+        alert.acknowledged_by = None
+        alert.closed_at = None
+        alert.closed_by = None
+
+    alert.updated_at = now
+    db.add(alert)
+    db.commit()
+    db.refresh(alert)
+    return alert

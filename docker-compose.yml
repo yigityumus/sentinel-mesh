@@ -35,6 +35,7 @@ services:
       retries: 5
     environment:
       - JWT_SECRET=${JWT_SECRET}
+      - LOG_SERVICE_URL=${LOG_SERVICE_URL}
 
   log:
     build: ./services/log

@@ -3,7 +3,6 @@ name = "auth-service"
 version = "0.1.0"
 description = "SentinelMesh authentication service"
 authors = ["Yigit Yumus <yigityumus@gmail.com>"]
-readme = "README.md"
 packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]

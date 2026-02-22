@@ -119,7 +119,7 @@ async function loadAlerts() {
   const table = document.getElementById("alertsTable");
   const body = document.getElementById("alertsBody");
 
-  if (!status || !table || !body) return; // page might not have alerts UI
+  if (!status || !table || !body) return;
 
   try {
     const res = await fetch("/log/alerts");
@@ -148,7 +148,30 @@ async function loadAlerts() {
         <td class="nowrap">${fmtIso(a.first_seen)}</td>
         <td class="nowrap">${fmtIso(a.last_seen)}</td>
         <td class="nowrap">${fmtIso(a.created_at)}</td>
-        <td class="mono small">${a.meta ? JSON.stringify(a.meta) : "{}"}</td>
+
+        <!-- Status -->
+        <td class="mono nowrap status-col">${a.status}</td>
+
+        <!-- Actions -->
+        <td class="actions-col">
+          ${
+            a.status === "open"
+              ? `
+                <button class="btn-secondary" onclick="ackAlert(${a.id})">Ack</button>
+                <button class="btn-secondary" onclick="closeAlert(${a.id})">Close</button>
+              `
+              : a.status === "acknowledged"
+              ? `
+                <button class="btn-secondary" onclick="closeAlert(${a.id})">Close</button>
+                <button class="btn-secondary" onclick="reopenAlert(${a.id})">Reopen</button>
+              `
+              : `
+                <button class="btn-secondary" onclick="reopenAlert(${a.id})">Reopen</button>
+              `
+          }
+        </td>
+
+        <td class="mono small meta-col">${a.meta ? JSON.stringify(a.meta) : "{}"}</td>
       </tr>
     `).join("");
 
@@ -161,4 +184,55 @@ async function loadAlerts() {
 
 function refreshAlerts() {
   loadAlerts();
+}
+
+
+function getActor() {
+  let actor = localStorage.getItem("actor");
+  if (!actor) {
+    actor = prompt("Analyst name (for alert actions):", "web-ui") || "web-ui";
+    localStorage.setItem("actor", actor);
+  }
+  return actor;
+}
+
+async function patchAlert(id, action) {
+  const actor = getActor();
+  const res = await fetch(`/log/alerts/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, actor })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to update alert");
+  }
+  return res.json();
+}
+
+async function ackAlert(id) {
+  try { 
+    await patchAlert(id, "ack"); 
+    await loadAlerts(); 
+  } catch (e) { 
+    alert(e.message); 
+  }
+}
+
+async function closeAlert(id) {
+  try { 
+    await patchAlert(id, "close"); 
+    await loadAlerts(); 
+  } catch (e) { 
+    alert(e.message); 
+  }
+}
+
+async function reopenAlert(id) {
+  try { 
+    await patchAlert(id, "reopen"); 
+    await loadAlerts(); 
+  } catch (e) { 
+    alert(e.message); 
+  }
 }

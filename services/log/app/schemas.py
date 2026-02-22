@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Literal
 
 
 class IngestEvent(BaseModel):
@@ -28,7 +29,20 @@ class AlertOut(BaseModel):
     first_seen: datetime
     last_seen: datetime
     created_at: datetime
+    updated_at: datetime
+
+    status: str
+    acknowledged_at: datetime | None
+    acknowledged_by: str | None
+    closed_at: datetime | None
+    closed_by: str | None
+
     meta: dict
 
     class Config:
         from_attributes = True
+
+
+class AlertUpdate(BaseModel):
+    action: Literal["ack", "close", "reopen"]
+    actor: str = "web-ui"

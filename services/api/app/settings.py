@@ -7,5 +7,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = "dev-change-me"
     JWT_ALG: str = "HS256"
 
+    LOG_SERVICE_URL: str = "http://log:8003"
+
 
 settings = Settings()

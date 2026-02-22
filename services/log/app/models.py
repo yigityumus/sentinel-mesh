@@ -41,4 +41,12 @@ class Alert(Base):
 
     meta: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
+    # lifecycle
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="open")
+    acknowledged_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    acknowledged_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    closed_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    closed_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
