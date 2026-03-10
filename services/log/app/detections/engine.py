@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Session
-from . import brute_force, token_abuse
+from . import brute_force, token_abuse, admin_probing
 
 
 # Register detection modules here
 DETECTION_RULES = [
     brute_force,
     token_abuse,
+    admin_probing,
 ]
 
 

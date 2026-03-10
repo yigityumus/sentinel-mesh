@@ -77,54 +77,133 @@ Should return something like:
 
 ## 2) Invalid / Missing JWT Burst (Probing Simulation)
 
-**Goal:** Trigger an alert when many requests arrive with missing/invalid JWTs (common probing / endpoint discovery behavior).
+**File:** `invalid_token_burst.py`
 
-**Expected alert metadata:** a note similar to:
+This script sends multiple requests with missing or invalid JWT tokens to trigger the `invalid_token_burst` detection rule.
 
-* `"Burst of invalid/missing JWTs (possible probing)"`
+### Detection Rule (Expected)
 
-### How to reproduce (manual)
+If the same IP generates:
 
-You can reproduce this without a script by repeatedly calling a protected endpoint **without** a token or with a bad token.
+- ≥ 10 `invalid_token`, `invalid_token_claims`, or `missing_token` events
+- within 120 seconds
 
-Example (missing token):
+Then SentinelMesh creates a **medium** severity alert.
 
-```bash
-for i in {1..20}; do
-  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/api/me
-done
-```
+### Usage
 
-Example (invalid token):
+Example:
 
 ```bash
-for i in {1..20}; do
-  curl -s -o /dev/null -w "%{http_code}\n" \
-    -H "Authorization: Bearer invalid.invalid.invalid" \
-    http://localhost:8080/api/me
-done
+python attacks/invalid_token_burst.py --show-alerts
 ```
 
-Then check alerts:
+Options:
+
+```bash
+--base-url        Base URL (default: http://localhost:8080)
+--attempts        Number of attempts (default: 15)
+--delay-ms        Delay between attempts in milliseconds (default: 100)
+--show-alerts     Fetch /log/alerts after execution
+```
+
+### Expected Result
+
+You should see multiple `401 Unauthorized` responses.
+
+Then:
 
 ```bash
 curl http://localhost:8080/log/alerts
 ```
 
-> Note: the exact threshold/window depends on your log-service detection rule configuration.
+Should return an alert with:
+
+```json
+{
+  "rule": "invalid_token_burst",
+  "severity": "medium",
+  "ip": "...",
+  "count": 10
+}
+```
+
+## 3) Admin Endpoint Probing Simulation
+
+**File:** `admin_probing.py`
+
+This script simulates a non-admin user attempting to access protected admin endpoints repeatedly, triggering the `admin_probing` detection rule.
+
+### Detection Rule (Expected)
+
+If the same IP generates:
+
+- ≥ 5 `unauthorized_admin_access` events
+- within 120 seconds
+
+Then SentinelMesh creates a **medium** severity alert.
+
+### Usage
+
+Example:
+
+```bash
+python attacks/admin_probing.py --email attacker@example.com --password PassAttacker1. --attempts 6 --show-alerts
+```
+
+Options:
+
+```bash
+--base-url        Base URL (default: http://localhost:8080)
+--email           Non-admin user email (required; will be created if needed)
+--password        Password for the user (default: TestPassword123)
+--attempts        Number of admin access attempts (default: 6)
+--delay-ms        Delay between attempts in milliseconds (default: 150)
+--show-alerts     Fetch /log/alerts after execution
+```
+
+### Expected Result
+
+The script will:
+
+1. Sign up a regular (non-admin) user
+2. Log in to obtain a valid JWT token
+3. Attempt to access `/api/admin/stats` multiple times (expecting 403 Forbidden)
+
+Then:
+
+```bash
+curl http://localhost:8080/log/alerts
+```
+
+Should return an alert with:
+
+```json
+{
+  "rule": "admin_probing",
+  "severity": "medium",
+  "ip": "...",
+  "count": 5
+}
+```
 
 ## Security Story (Demo Narrative)
 
-1. Attacker generates suspicious behavior (failed logins or invalid token bursts)
-2. `auth-service` and/or protected API generates security-relevant events
-3. `log-service` detects the pattern based on rules
-4. Alerts are stored (Postgres)
-5. Alerts are visible via API + Web UI (`/alerts.html`)
+This attack tooling demonstrates a complete detection pipeline:
+
+1. **Attacker generates suspicious behavior** (failed logins, invalid tokens, or unauthorized endpoint access)
+2. **Services emit structured security events** (`auth-service`, `api-service`)
+3. **Centralized log-service ingests events** via `/ingest` endpoint
+4. **Detection rules analyze patterns** based on IP, event type, time windows, and thresholds
+5. **Alerts are generated** with severity, context, and metadata
+6. **Alerts are stored** in Postgres and exposed via `/log/alerts`
+7. **Analysts view alerts** via the web UI (`/alerts.html`) or API
 
 This demonstrates:
 
-* Centralized logging
-* Detection rules
-* Real-time alert generation
-* Microservice architecture
+* Centralized security event logging
+* Pluggable detection rules
+* Real-time alert generation and lifecycle management
+* Microservices architecture with shared event schema
 * PostgreSQL-backed security analytics
+* SOC-like operational workflow

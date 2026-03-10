@@ -75,7 +75,14 @@ def get_current_user(
     return {"user_id": sub, "role": role}
 
 
-def require_admin(user: dict = Depends(get_current_user)) -> dict:
+def require_admin(request: Request, user: dict = Depends(get_current_user)) -> dict:
     if user["role"] != "admin":
+        send_event(
+            event="unauthorized_admin_access",
+            ip=client_ip(request),
+            path=original_path(request),
+            user_id=user["user_id"],
+            meta={"role": user["role"]},
+        )
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     return user
