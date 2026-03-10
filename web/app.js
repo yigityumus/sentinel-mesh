@@ -125,32 +125,45 @@ async function loadAlerts() {
     const res = await fetch("/log/alerts");
     if (!res.ok) throw new Error("Failed to load alerts");
 
-    const alerts = await res.json();
+    const allAlerts = await res.json();
+
+    // Get filter preferences
+    const showOpen = document.getElementById("filterOpen")?.checked ?? true;
+    const showAck = document.getElementById("filterAck")?.checked ?? true;
+    const showClosed = document.getElementById("filterClosed")?.checked ?? true;
+
+    // Filter alerts based on checkbox state
+    const alerts = allAlerts.filter(a => {
+      if (a.status === "open") return showOpen;
+      if (a.status === "acknowledged") return showAck;
+      if (a.status === "closed") return showClosed;
+      return true;
+    });
 
     if (!Array.isArray(alerts) || alerts.length === 0) {
-      status.innerText = "No alerts.";
+      status.innerText = `No alerts matching filters. (Total: ${allAlerts.length})`;
       table.style.display = "none";
       body.innerHTML = "";
       return;
     }
 
-    status.innerText = `Showing latest ${alerts.length} alert(s).`;
+    status.innerText = `Showing ${alerts.length} of ${allAlerts.length} alert(s).`;
     table.style.display = "table";
 
     body.innerHTML = alerts.map(a => `
       <tr>
-        <td class="mono nowrap">${a.id}</td>
-        <td class="mono">${a.rule}</td>
-        <td><span class="pill ${severityClass(a.severity)}">${a.severity}</span></td>
-        <td class="mono nowrap">${a.ip}</td>
-        <td class="mono nowrap">${a.count} / ${a.threshold}</td>
-        <td class="mono nowrap">${a.window_seconds}s</td>
-        <td class="nowrap">${fmtIso(a.first_seen)}</td>
-        <td class="nowrap">${fmtIso(a.last_seen)}</td>
-        <td class="nowrap">${fmtIso(a.created_at)}</td>
+        <td class="mono nowrap id-col">${a.id}</td>
+        <td class="mono rule-col">${a.rule}</td>
+        <td class="severity-col"><span class="pill ${severityClass(a.severity)}">${a.severity}</span></td>
+        <td class="mono nowrap ip-col">${a.ip}</td>
+        <td class="mono nowrap count-col">${a.count} / ${a.threshold}</td>
+        <td class="mono nowrap window-col">${a.window_seconds}s</td>
+        <td class="nowrap time-col">${fmtIso(a.first_seen)}</td>
+        <td class="nowrap time-col">${fmtIso(a.last_seen)}</td>
+        <td class="nowrap time-col">${fmtIso(a.created_at)}</td>
 
-        <!-- Status -->
-        <td class="mono nowrap status-col">${a.status}</td>
+        <!-- Status Badge -->
+        <td class="status-col"><span class="status-badge ${a.status}">${a.status}</span></td>
 
         <!-- Actions -->
         <td class="actions-col">

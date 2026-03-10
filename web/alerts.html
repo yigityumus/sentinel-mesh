@@ -25,6 +25,22 @@
 
     <div id="status" class="muted">Loading...</div>
 
+    <!-- Filter Controls -->
+    <div style="display: flex; gap: 10px; margin: 16px 0; align-items: center;">
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input type="checkbox" id="filterOpen" checked onchange="loadAlerts()" />
+        <span style="font-size: 13px;">Open</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input type="checkbox" id="filterAck" checked onchange="loadAlerts()" />
+        <span style="font-size: 13px;">Acknowledged</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input type="checkbox" id="filterClosed" checked onchange="loadAlerts()" />
+        <span style="font-size: 13px;">Closed</span>
+      </label>
+    </div>
+
     <!-- Scroll wrapper -->
     <div class="table-wrapper">
       <table id="alertsTable" style="display:none;">

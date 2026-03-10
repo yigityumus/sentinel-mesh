@@ -82,26 +82,34 @@ button:hover {
   overflow-x: auto;
   width: 100%;
   margin-top: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(148,163,184,0.1);
 }
 
 /* ===== Table ===== */
 
 table {
   border-collapse: collapse;
-  min-width: 1200px; /* forces horizontal scroll */
+  min-width: 100%;
+  width: 100%;
 }
 
 th, td {
   text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid rgba(148,163,184,0.2);
+  padding: 12px;
+  border-bottom: 1px solid rgba(148,163,184,0.15);
   font-size: 13px;
   white-space: nowrap; /* prevent vertical letter stacking */
 }
 
 th {
+  position: sticky;
+  top: 0;
   color: #cbd5e1;
   font-weight: 600;
+  background: #0f1729;
+  z-index: 10;
+  border-bottom: 2px solid rgba(148,163,184,0.3);
 }
 
 /* ===== Severity Pills ===== */
@@ -128,32 +136,62 @@ th {
   border: 1px solid rgba(34,197,94,0.5);
 }
 
-/* ===== Status Colors ===== */
+/* ===== Status Badges ===== */
 
-.status-open {
-  color: #f87171;
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.status-ack {
-  color: #fbbf24;
+.status-badge.open {
+  background: rgba(248,113,113,0.2);
+  border: 1px solid rgba(248,113,113,0.5);
+  color: #fca5a5;
 }
 
-.status-closed {
-  color: #22c55e;
+.status-badge.acknowledged {
+  background: rgba(251,191,36,0.2);
+  border: 1px solid rgba(251,191,36,0.5);
+  color: #fcd34d;
+}
+
+.status-badge.closed {
+  background: rgba(34,197,94,0.2);
+  border: 1px solid rgba(34,197,94,0.5);
+  color: #86efac;
 }
 
 /* ===== Actions ===== */
 
 td button {
   padding: 6px 10px;
-  margin: 3px 6px 3px 0;
+  margin: 4px 6px 4px 0;
   font-size: 12px;
   border-radius: 6px;
+  white-space: nowrap;
 }
+
+/* ===== Column Width Hints ===== */
+
+.id-col { min-width: 60px; }
+.rule-col { min-width: 120px; }
+.severity-col { min-width: 80px; }
+.ip-col { min-width: 120px; }
+.count-col { min-width: 90px; }
+.window-col { min-width: 80px; }
+.time-col { min-width: 150px; }
+.status-col { min-width: 100px; }
+.actions-col { min-width: 180px; }
+.meta-col { min-width: 200px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
 
 /* ===== Meta Column ===== */
 
 td:last-child {
   font-size: 12px;
-  white-space: pre;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 300px;
 }
