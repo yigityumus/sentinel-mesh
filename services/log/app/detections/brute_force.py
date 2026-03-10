@@ -3,11 +3,10 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from ..models import Event, Alert
+from ..settings import settings
 
 
 RULE_NAME = "brute_force_login"
-WINDOW_SECONDS = 120
-THRESHOLD = 5
 
 
 def evaluate(db: Session, event) -> None:
@@ -15,9 +14,12 @@ def evaluate(db: Session, event) -> None:
     if event.event != "login_failed":
         return
 
+    threshold = settings.BRUTE_FORCE_THRESHOLD
+    window_seconds = settings.BRUTE_FORCE_WINDOW_SECONDS
+
     ip = event.ip
     now_ts = event.ts
-    window_start = now_ts - timedelta(seconds=WINDOW_SECONDS)
+    window_start = now_ts - timedelta(seconds=window_seconds)
 
     count_q = select(func.count()).select_from(Event).where(
         Event.event == "login_failed",
@@ -27,14 +29,14 @@ def evaluate(db: Session, event) -> None:
     )
     count = db.execute(count_q).scalar_one()
 
-    if count < THRESHOLD:
+    if count < threshold:
         return
 
     # Avoid duplicate alerts in same window
     recent_alert_q = select(Alert).where(
         Alert.rule == RULE_NAME,
         Alert.ip == ip,
-        Alert.created_at >= (now_ts - timedelta(seconds=WINDOW_SECONDS)),
+        Alert.created_at >= (now_ts - timedelta(seconds=window_seconds)),
     ).order_by(Alert.id.desc())
 
     recent = db.execute(recent_alert_q).scalars().first()
@@ -53,8 +55,8 @@ def evaluate(db: Session, event) -> None:
         rule=RULE_NAME,
         severity="high",
         ip=ip,
-        window_seconds=WINDOW_SECONDS,
-        threshold=THRESHOLD,
+        window_seconds=window_seconds,
+        threshold=threshold,
         count=count,
         first_seen=first_seen,
         last_seen=last_seen,
