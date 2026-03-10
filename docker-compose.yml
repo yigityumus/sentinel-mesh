@@ -16,8 +16,8 @@ services:
       retries: 5
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
       - LOG_SERVICE_URL=${LOG_SERVICE_URL}
+      - AUTH_PRIVATE_KEY=${AUTH_PRIVATE_KEY:-}
     depends_on:
       - postgres
 
@@ -34,8 +34,9 @@ services:
       timeout: 3s
       retries: 5
     environment:
-      - JWT_SECRET=${JWT_SECRET}
       - LOG_SERVICE_URL=${LOG_SERVICE_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL:-http://auth:8001}
+      - JWKS_URL=${JWKS_URL:-http://auth:8001/.well-known/jwks.json}
 
   log:
     build: ./services/log

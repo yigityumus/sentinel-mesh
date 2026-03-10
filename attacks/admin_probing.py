@@ -89,7 +89,7 @@ def main() -> int:
     # Step 1: Create or sign up the user
     print(f"Signing up user: {args.email} ...")
     code, body = post_json(signup_url, {"email": args.email, "password": args.password})
-    if code not in (200, 409):  # 200 OK or 409 Conflict already exists
+    if code not in (201, 409):  # 201 Created or 409 Conflict already exists
         print(f"ERROR: Signup failed with HTTP {code}")
         print(json.dumps(body, indent=2) if isinstance(body, dict) else body)
         return 1

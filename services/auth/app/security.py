@@ -3,6 +3,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from jose import jwt
 from .settings import settings
+from .keys import load_private_key
 
 # Argon2id by default in argon2-cffi’s PasswordHasher
 _hasher = PasswordHasher()
@@ -29,4 +30,7 @@ def create_access_token(*, user_id: int, role: str) -> str:
         "iat": int(now.timestamp()),
         "exp": int(exp.timestamp()),
     }
-    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALG)
+    
+    # Sign with RS256 using private key
+    private_key = load_private_key(settings.private_key_pem)
+    return jwt.encode(payload, private_key, algorithm=settings.JWT_ALG)

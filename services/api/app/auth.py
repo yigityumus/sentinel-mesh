@@ -3,6 +3,7 @@ from jose import jwt, JWTError
 
 from .settings import settings
 from .log_client import send_event
+from .keys import load_public_key
 
 
 def client_ip(request: Request) -> str:
@@ -38,9 +39,15 @@ def get_current_user(
     token: str = Depends(get_bearer_token),
 ) -> dict:
     try:
+        # Verify using RS256 with public key
+        public_key_pem = settings.public_key_pem
+        if not public_key_pem:
+            raise JWTError("Public key not available")
+        
+        public_key = load_public_key(public_key_pem)
         payload = jwt.decode(
             token,
-            settings.JWT_SECRET,
+            public_key,
             algorithms=[settings.JWT_ALG],
         )
     except JWTError:
