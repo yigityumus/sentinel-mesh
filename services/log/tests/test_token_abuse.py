@@ -1,8 +1,6 @@
 """Tests for invalid token burst detection rule."""
 
-import pytest
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import select
 
 from app.models import Event, Alert
 from app.detections.token_abuse import evaluate as eval_token_abuse

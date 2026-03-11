@@ -1,8 +1,6 @@
 """Tests for admin probing detection rule."""
 
-import pytest
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import select
 
 from app.models import Event, Alert
 from app.detections.admin_probing import evaluate as eval_admin_probing

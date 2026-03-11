@@ -1,19 +1,15 @@
 """Tests for log service API endpoints."""
 
-import pytest
 import sys
+import pytest
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 # Mock the engine before importing app and FastAPI
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.db import Base
 from app.models import Event, Alert
-from app.schemas import IngestEvent, AlertUpdate
 
 
 def utcnow():

@@ -9,8 +9,13 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.db import Base
-from app.models import Event, Alert
+from app.models import Event
 from app.settings import Settings
+
+# Import detection modules so we can mock their settings
+import app.detections.brute_force as brute_force_module
+import app.detections.token_abuse as token_abuse_module
+import app.detections.admin_probing as admin_probing_module
 
 
 # Make JSONB work with SQLite for testing
@@ -23,7 +28,7 @@ def compile_jsonb_sqlite(type_, compiler, **kw):
 @pytest.fixture
 def test_settings():
     """Return test settings with lower thresholds for easier testing."""
-    settings = Settings(
+    settings_obj = Settings(
         DATABASE_URL="sqlite:///:memory:",
         BRUTE_FORCE_THRESHOLD=3,
         BRUTE_FORCE_WINDOW_SECONDS=120,
@@ -32,7 +37,11 @@ def test_settings():
         ADMIN_PROBING_THRESHOLD=3,
         ADMIN_PROBING_WINDOW_SECONDS=120,
     )
-    return settings
+    # Replace the global settings in all detection modules
+    brute_force_module.settings = settings_obj
+    token_abuse_module.settings = settings_obj
+    admin_probing_module.settings = settings_obj
+    return settings_obj
 
 
 @pytest.fixture
@@ -98,7 +107,8 @@ def create_multiple_events(db_session, sample_event_data):
         base_time = utcnow()
         for i in range(count):
             data = sample_event_data.copy()
-            data["ts"] = base_time + timedelta(seconds=i)
+            # Create events with past timestamps (subtract seconds so they're before trigger)
+            data["ts"] = base_time - timedelta(seconds=count - i)
             data.update(kwargs)
             event = Event(**data)
             db_session.add(event)

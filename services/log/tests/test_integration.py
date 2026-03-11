@@ -1,8 +1,6 @@
 """Integration tests for detection pipeline."""
 
-import pytest
 from datetime import datetime, timezone, timedelta
-from sqlalchemy.orm import Session
 
 from app.models import Event, Alert
 from app.detections.engine import run_detection_pipeline

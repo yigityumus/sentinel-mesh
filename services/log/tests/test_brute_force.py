@@ -1,8 +1,6 @@
 """Tests for brute force login detection rule."""
 
-import pytest
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import select
 
 from app.models import Event, Alert
 from app.detections.brute_force import evaluate as eval_brute_force
@@ -65,7 +63,7 @@ class TestBruteForceDetection:
         assert len(alerts) == 1
         assert alerts[0].severity == "high"
         assert alerts[0].ip == "192.168.1.100"
-        assert alerts[0].count == 3
+        assert alerts[0].count == 4  # 3 created + 1 trigger
 
     def test_no_alert_for_successful_login(self, db_session, create_multiple_events):
         """Should not trigger alert for successful logins."""
@@ -141,9 +139,9 @@ class TestBruteForceDetection:
         db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "brute_force_login").all()
-        # Should only count 3 events in window, not the old one
+        # Should only count 3 in-window events + trigger = 4, not the old one
         assert len(alerts) == 1
-        assert alerts[0].count == 3
+        assert alerts[0].count == 4
 
     def test_different_ips_isolated(self, db_session):
         """Should not alert on events from different IPs."""
@@ -217,7 +215,8 @@ class TestBruteForceDetection:
         db_session.add(trigger_event1)
         db_session.commit()
 
-        eval_brute_force(db_session, trigger_event1)        db_session.commit()
+        eval_brute_force(db_session, trigger_event1)
+        db_session.commit()
         # Verify first alert was created
         alerts = db_session.query(Alert).filter(Alert.rule == "brute_force_login").all()
         assert len(alerts) == 1
@@ -262,6 +261,7 @@ class TestBruteForceDetection:
         db_session.commit()
 
         eval_brute_force(db_session, trigger_event)
+        db_session.commit()
 
         alert = db_session.query(Alert).filter(Alert.rule == "brute_force_login").first()
         assert alert.window_seconds == 120
@@ -291,9 +291,10 @@ class TestBruteForceDetection:
 
         db_session.commit()
 
+        trigger_time = utcnow()
         trigger_event = Event(
             v=1,
-            ts=base_time,
+            ts=trigger_time,
             service="auth",
             event="login_failed",
             ip="192.168.1.100",
@@ -308,5 +309,6 @@ class TestBruteForceDetection:
         db_session.commit()
 
         alert = db_session.query(Alert).filter(Alert.rule == "brute_force_login").first()
-        assert alert.first_seen == min(times)
-        assert alert.last_seen == max(times)
+        # last_seen should be the trigger event, first_seen should be the oldest created event
+        assert alert.first_seen.replace(tzinfo=None) == min(times).replace(tzinfo=None)
+        assert alert.last_seen.replace(tzinfo=None) == trigger_time.replace(tzinfo=None)
