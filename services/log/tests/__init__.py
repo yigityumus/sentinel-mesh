@@ -1,0 +1,1 @@
+"""Log service tests module."""
