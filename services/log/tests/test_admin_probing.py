@@ -32,6 +32,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 0
@@ -54,6 +55,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 1
@@ -79,6 +81,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 0
@@ -101,6 +104,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 0
@@ -153,6 +157,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 1
@@ -194,6 +199,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 0
@@ -232,6 +238,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event1)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 1
@@ -251,6 +258,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event2)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 1  # Still only 1 alert
@@ -273,6 +281,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event)
+        db_session.commit()
 
         alert = db_session.query(Alert).filter(Alert.rule == "admin_probing").first()
         assert alert.window_seconds == 120
@@ -315,6 +324,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event)
+        db_session.commit()
 
         alert = db_session.query(Alert).filter(Alert.rule == "admin_probing").first()
         assert alert.first_seen == min(times)
@@ -354,6 +364,7 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         eval_admin_probing(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 1

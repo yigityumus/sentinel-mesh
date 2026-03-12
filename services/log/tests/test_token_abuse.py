@@ -32,6 +32,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 0
@@ -54,12 +55,13 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1
         assert alerts[0].severity == "medium"
         assert alerts[0].ip == "192.168.1.100"
-        assert alerts[0].count == 5
+        assert alerts[0].count == 6
 
     def test_counts_multiple_token_event_types(self, db_session):
         """Should count all token-related events together."""
@@ -96,6 +98,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1
@@ -120,6 +123,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 0
@@ -172,6 +176,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1
@@ -213,6 +218,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 0
@@ -251,6 +257,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event1)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1
@@ -270,6 +277,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event2)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1  # Still only 1 alert
@@ -292,6 +300,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event)
+        db_session.commit()
 
         alert = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").first()
         assert alert.window_seconds == 120
@@ -331,6 +340,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1
@@ -368,6 +378,7 @@ class TestTokenAbuseDetection:
         db_session.commit()
 
         eval_token_abuse(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1

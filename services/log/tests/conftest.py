@@ -47,6 +47,7 @@ def test_settings():
 @pytest.fixture
 def db_engine(test_settings):
     """Create an in-memory SQLite database for testing."""
+    # Create a NEW database for each test to ensure full isolation
     engine = create_engine(
         test_settings.DATABASE_URL,
         connect_args={"check_same_thread": False},
@@ -55,6 +56,7 @@ def db_engine(test_settings):
     Base.metadata.create_all(bind=engine)
     yield engine
     Base.metadata.drop_all(bind=engine)
+    engine.dispose()
 
 
 @pytest.fixture
@@ -63,6 +65,7 @@ def db_session(db_engine) -> Session:
     TestingSessionLocal = sessionmaker(bind=db_engine, autoflush=False, autocommit=False)
     session = TestingSessionLocal()
     yield session
+    session.rollback()  # Rollback to ensure test isolation
     session.close()
 
 
