@@ -48,6 +48,7 @@ class TestDetectionPipeline:
 
         # Run the full pipeline
         run_detection_pipeline(db_session, trigger_event)
+        db_session.commit()
 
         # Should have created a brute force alert
         alerts = db_session.query(Alert).filter(Alert.rule == "brute_force_login").all()
@@ -87,6 +88,7 @@ class TestDetectionPipeline:
         db_session.commit()
 
         run_detection_pipeline(db_session, trigger_event)
+        db_session.commit()
 
         # Check for alerts
         all_alerts = db_session.query(Alert).all()
@@ -111,6 +113,7 @@ class TestDetectionPipeline:
         db_session.commit()
 
         run_detection_pipeline(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).all()
         assert len(alerts) == 0
@@ -164,6 +167,7 @@ class TestDetectionPipeline:
         db_session.commit()
 
         run_detection_pipeline(db_session, trigger_event1)
+        db_session.commit()
 
         # Should have alert for IP1 only
         alerts = db_session.query(Alert).all()
@@ -204,6 +208,7 @@ class TestDetectionPipeline:
         db_session.commit()
 
         run_detection_pipeline(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1
@@ -242,6 +247,7 @@ class TestDetectionPipeline:
         db_session.commit()
 
         run_detection_pipeline(db_session, trigger_event)
+        db_session.commit()
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 1
@@ -296,6 +302,7 @@ class TestDetectionPipeline:
         db_session.commit()
 
         run_detection_pipeline(db_session, trigger_token)
+        db_session.commit()
 
         alerts = db_session.query(Alert).all()
         # Should have token burst alert (brute force won't trigger from token event)

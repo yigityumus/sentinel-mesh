@@ -16,7 +16,7 @@ class TestTokenAbuseDetection:
     def test_no_alert_below_threshold(self, db_session, create_multiple_events):
         """Should not create alert if invalid token count is below threshold."""
         # Threshold is 5 in test settings
-        create_multiple_events(4, event="invalid_token", ip="192.168.1.100")
+        create_multiple_events(3, event="invalid_token", ip="192.168.1.100")
 
         trigger_event = Event(
             v=1,
@@ -102,8 +102,8 @@ class TestTokenAbuseDetection:
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1
-        # Should count all 6 events (2 of each type)
-        assert alerts[0].count == 6
+        # Should count all 7 events (6 pre-trigger + 1 trigger)
+        assert alerts[0].count == 7
 
     def test_no_alert_for_valid_token_requests(self, db_session, create_multiple_events):
         """Should not trigger alert for events without token issues."""
@@ -180,8 +180,8 @@ class TestTokenAbuseDetection:
 
         alerts = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").all()
         assert len(alerts) == 1
-        # Should only count 5 events in window, not the old one
-        assert alerts[0].count == 5
+        # Should only count 6 events in window (5 pre-trigger + 1 trigger), not the old one
+        assert alerts[0].count == 6
 
     def test_different_ips_isolated(self, db_session):
         """Should not alert on events from different IPs."""
@@ -305,7 +305,7 @@ class TestTokenAbuseDetection:
         alert = db_session.query(Alert).filter(Alert.rule == "invalid_token_burst").first()
         assert alert.window_seconds == 120
         assert alert.threshold == 5
-        assert "token" in alert.meta.get("note", "").lower()
+        assert "jwt" in alert.meta.get("note", "").lower()
 
     def test_missing_token_event_type(self, db_session):
         """Should detect missing_token event type."""

@@ -16,7 +16,7 @@ class TestAdminProbingDetection:
     def test_no_alert_below_threshold(self, db_session, create_multiple_events):
         """Should not create alert if unauthorized admin access count is below threshold."""
         # Threshold is 3 in test settings
-        create_multiple_events(2, event="unauthorized_admin_access", ip="192.168.1.100")
+        create_multiple_events(1, event="unauthorized_admin_access", ip="192.168.1.100")
 
         trigger_event = Event(
             v=1,
@@ -61,7 +61,7 @@ class TestAdminProbingDetection:
         assert len(alerts) == 1
         assert alerts[0].severity == "medium"
         assert alerts[0].ip == "192.168.1.100"
-        assert alerts[0].count == 3
+        assert alerts[0].count == 4
 
     def test_no_alert_for_authorized_admin_access(self, db_session, create_multiple_events):
         """Should not trigger alert for authorized admin access."""
@@ -161,8 +161,8 @@ class TestAdminProbingDetection:
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 1
-        # Should only count 3 events in window, not the old one
-        assert alerts[0].count == 3
+        # Should only count 4 events in window (3 pre-trigger + 1 trigger), not the old one
+        assert alerts[0].count == 4
 
     def test_different_ips_isolated(self, db_session):
         """Should not alert on events from different IPs."""
@@ -327,8 +327,11 @@ class TestAdminProbingDetection:
         db_session.commit()
 
         alert = db_session.query(Alert).filter(Alert.rule == "admin_probing").first()
-        assert alert.first_seen == min(times)
-        assert alert.last_seen == max(times)
+        # Compare without timezone since Alert stores naive datetimes
+        # Include trigger event in the range (it's the most recent event)
+        all_times = times + [base_time]
+        assert alert.first_seen == min(all_times).replace(tzinfo=None)
+        assert alert.last_seen == max(all_times).replace(tzinfo=None)
 
     def test_multiple_admin_endpoints(self, db_session):
         """Should count unauthorized admin access attempts across different admin endpoints."""
@@ -368,5 +371,5 @@ class TestAdminProbingDetection:
 
         alerts = db_session.query(Alert).filter(Alert.rule == "admin_probing").all()
         assert len(alerts) == 1
-        # Should count all 3 attempts across different endpoints
-        assert alerts[0].count == 3
+        # Should count all 4 attempts across different endpoints (3 pre-trigger + 1 trigger)
+        assert alerts[0].count == 4
